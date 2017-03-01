@@ -14,10 +14,13 @@ class DashboardPage extends React.Component {
     this.state = {
       secretData: '',
       errors: {},
+      books : [],
+      newbook : "",
       user: {
         name: '',
         city: '',
         state: '',
+        _id: ''
       }
     };
   }
@@ -88,10 +91,96 @@ class DashboardPage extends React.Component {
     });
   }
 
+
   /**
-   * This method will be executed after initial rendering.
+   * Process the book adding form.
+   *
+   * @param {object} event - the JavaScript event object
    */
-  componentDidMount() {
+  submitBook(event) {
+    // prevent default action. in this case, action is the form submission event
+    event.preventDefault();
+
+    // create a string for an HTTP body message
+    const newbook = encodeURIComponent(this.state.newbook);
+    // const formData = `newbook=${newbook}&owner=${this.state.user._id}`;
+    const formData = `newbook=${newbook}`;
+
+    // create an AJAX request
+    const xhr = new XMLHttpRequest();
+    xhr.open('post', '/api/book');
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    // set the authorization HTTP header
+    xhr.setRequestHeader('Authorization', `bearer ${Auth.getToken()}`);
+    xhr.responseType = 'json';
+    xhr.addEventListener('load', () => {
+      if (xhr.status === 200) {
+        // success
+
+        // change the component-container state
+        this.setState({
+          secretData: xhr.response.message,
+          errors: {},
+          // books: this.state.books.concat([newbook]),
+          newbook: ""
+        });
+
+        // set a message
+        localStorage.setItem('successMessage', xhr.response.message);
+
+        this.loadInfo();
+        // make a redirect // no redirect needed
+        // this.context.router.replace('/login');
+      } else {
+        // failure
+
+        const errors = xhr.response.errors ? xhr.response.errors : {};
+        errors.summary = xhr.response.message;
+
+        this.setState({
+          errors
+        });
+      }
+    });
+    xhr.send(formData);
+  }
+
+  /**
+   * Change the user object.
+   *
+   * @param {object} event - the JavaScript event object
+   */
+  changeBook(event) {
+    // const field = event.target.name;
+    // const newbook = this.state.newbook;
+    const newbook = event.target.value;
+    this.setState({
+      newbook
+    });
+  }
+
+  deleteCard(book) {
+    // create a string for an HTTP body message
+    const bookid = encodeURIComponent(book._id);
+    // const formData = `newbook=${newbook}&owner=${this.state.user._id}`;
+    const formData = `bookid=${bookid}`;
+
+    // create an AJAX request
+    const xhr = new XMLHttpRequest();
+    xhr.open('delete', '/api/book');
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    // set the authorization HTTP header
+    xhr.setRequestHeader('Authorization', `bearer ${Auth.getToken()}`);
+    xhr.responseType = 'json';
+    // xhr.addEventListener('load', () => {
+    //   this.loadInfo();
+    // })
+    xhr.send(formData);
+    // console.log('deleteCard', book)
+    this.loadInfo();
+  }
+
+  loadInfo(){
     const xhr = new XMLHttpRequest();
     xhr.open('get', '/api/dashboard');
     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -100,18 +189,26 @@ class DashboardPage extends React.Component {
     xhr.responseType = 'json';
     xhr.addEventListener('load', () => {
       if (xhr.status === 200) {
-        console.log(xhr.response)
+        // console.log(xhr.response)
         this.setState({
           secretData: xhr.response.message,
           user: {
             name: xhr.response.user.name,
             city: xhr.response.user.city,
             state: xhr.response.user.state,
-          }
+            _id: xhr.response.user._id,
+          },
+          books: xhr.response.books,
         });
       }
     });
     xhr.send();
+  }
+  /**
+   * This method will be executed after initial rendering.
+   */
+  componentDidMount() {
+    this.loadInfo();
   }
 
   /**
@@ -124,6 +221,11 @@ class DashboardPage extends React.Component {
       onChange={(y) => this.changeUser(y)}
       errors={this.state.errors}
       user={this.state.user}
+      books = {this.state.books}
+      newbook = {this.state.newbook}
+      onSubmitBook={(y) => this.submitBook(y)}
+      onChangeBook={(y) => this.changeBook(y)}
+      deleteCard={(y) => this.deleteCard(y)}
       />);
   }
 

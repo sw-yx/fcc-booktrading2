@@ -8,6 +8,7 @@ const Base = ({ children }) => (
     <div className="top-bar">
       <div className="top-bar-left">
         <IndexLink to="/">React App</IndexLink>
+        <Link to="/allbooks">All Books</Link>
       </div>
 
       {Auth.isUserAuthenticated() ? (

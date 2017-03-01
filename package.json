@@ -13,6 +13,7 @@
     "bcrypt": "^1.0.2",
     "body-parser": "^1.16.1",
     "express": "^4.14.1",
+    "flickrapi": "^0.6.0",
     "jsonwebtoken": "^7.3.0",
     "material-ui": "^0.17.0",
     "mongoose": "^4.8.5",

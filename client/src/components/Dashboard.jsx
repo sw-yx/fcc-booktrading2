@@ -1,7 +1,26 @@
 import React, { PropTypes } from 'react';
-import { Card, CardTitle, CardText } from 'material-ui/Card';
+import { Card, CardHeader, CardActions, CardTitle, CardText } from 'material-ui/Card';
 import RaisedButton from 'material-ui/RaisedButton';
+import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
+
+
+class CardExampleExpandable extends React.Component {
+  constructor(props){
+    super(props);
+  }
+  render() {
+    return (<Card>
+      <CardHeader
+        title={"Title: " + this.props.book.title}
+      />
+      <CardActions>
+        {(this.props.book.wanters.length > 0 ? <FlatButton label="Accept Transfer" /> : <div />)}
+        <FlatButton label="Delete" onClick={() => {this.props.deleteCard(this.props.book)}}/>
+      </CardActions>
+  </Card>)
+  }
+}
 
 
 const Dashboard = ({ 
@@ -10,30 +29,33 @@ const Dashboard = ({
   onChange,
   errors,
   user,
+  books,
+  newbook,
+  onSubmitBook,
+  onChangeBook,
+  deleteCard
  }) => (
   <Card className="container">
     <CardTitle
-      title="Dashboard"
-      subtitle="You should get access to this page only after authentication."
+      title="User Dashboard"
     />
 
     {secretData && <CardText style={{ fontSize: '16px', color: 'green' }}>{secretData}</CardText>}
 
     <form action="/" onSubmit={onSubmit}>
-      <h2 className="card-heading">Sign Up</h2>
+      <h2 className="card-heading">User Details</h2>
 
       {errors.summary && <p className="error-message">{errors.summary}</p>}
 
       <div className="field-line">
         <TextField
-          floatingLabelText="Name"
+          floatingLabelText="Full Name"
           name="name"
           errorText={errors.name}
           onChange={onChange}
           value={user.name}
         />
       </div>
-
       <div className="field-line">
         <TextField
           floatingLabelText="City"
@@ -42,9 +64,6 @@ const Dashboard = ({
           onChange={onChange}
           value={user.city}
         />
-      </div>
-
-      <div className="field-line">
         <TextField
           floatingLabelText="State"
           name="state"
@@ -59,6 +78,26 @@ const Dashboard = ({
       </div>
     </form>
 
+    <form action="/" onSubmit={onSubmitBook}>
+      <h2>My Books:
+      </h2>
+      {books.map((x,i)=> {return <CardExampleExpandable key={i} book={x} deleteCard={deleteCard}/>})}
+      <h2 className="card-heading">Add Book</h2>
+
+      <div className="field-line">
+        <TextField
+          floatingLabelText="Book Name"
+          name="bookname"
+          errorText={errors.bookname}
+          onChange={onChangeBook}
+          value={newbook}
+        />
+      </div>
+
+      <div className="button-line">
+        <RaisedButton type="submit" label="Add Book" primary />
+      </div>
+    </form>
 
 
   </Card>
@@ -69,7 +108,11 @@ Dashboard.propTypes = {
   onChange: PropTypes.func.isRequired,
   errors: PropTypes.object.isRequired,
   user: PropTypes.object.isRequired,
-  secretData: PropTypes.string.isRequired
+  // books: PropTypes.object.isRequired,
+  // newbook: PropTypes.object.isRequired,
+  secretData: PropTypes.string.isRequired,
+  onSubmitBook: PropTypes.func.isRequired,
+  onChangeBook: PropTypes.func.isRequired
 };
 
 export default Dashboard;
